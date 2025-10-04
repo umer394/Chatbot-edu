@@ -8,7 +8,7 @@ export function SignupForm() {
   return (
     <form action={action} className="grid grid-cols-1 justify-center items-center">
       <div>
-        <label htmlFor="name" >Name</label>
+        <label htmlFor="name">Name</label>
         <input id="name" name="name"  className="p-2 border-2" placeholder="Name" />
       </div>
       {state?.errors?.name && <p>{state.errors.name}</p> }
