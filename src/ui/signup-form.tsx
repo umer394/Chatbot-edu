@@ -15,6 +15,9 @@ export function SignupForm() {
       headers:{"Content-Type":"application/json"},
       body: JSON.stringify(form)
     })
+
+    const data = await res.json();
+    setMessage(data.error || data.message);
   }
   return (
     <form onSubmit={handleSubmit} className="grid grid-cols-1 justify-center items-center">

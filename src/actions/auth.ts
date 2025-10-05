@@ -2,7 +2,7 @@
 
 import { FormState, SignupFormSchema } from "../lib/definition";
 import { cookies } from 'next/headers'
-import { deleteSession } from '@/app/lib/session'
+import { deleteSession } from '@/lib/session'
 import bcrypt from "bcrypt";
 export async function signup(state:FormState,formData: FormData) {
     // safeParse attempts to validate the incoming form data against SignupFormSchema.
