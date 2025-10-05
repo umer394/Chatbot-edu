@@ -6,7 +6,8 @@ export default async function home(){
   const data = cookieStore.get('user_data')
   return (
     <div>
-      {data?.value}
+      {/* {data?.value} */}
+      Hello
     </div>
   )
 }
