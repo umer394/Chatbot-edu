@@ -9,8 +9,7 @@ function generateUserId(): string {
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, confirmPassword } = await req.json();
-
+    const { name, email, password, confirmPassword ,createdAt} = await req.json();
     if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -42,25 +41,31 @@ export async function POST(req: Request) {
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
-    const newUser = await User.create({
+    // Create new user with explicit fields
+    const userData = {
       userId,
       name,
       email,
       password: hashedPassword,
       role: "user",
       createdAt: new Date(),
-    });
+    };
 
+    const newUser = new User(userData);
+    await newUser.save();
+    
+    // Convert to plain object to ensure all fields are accessible
+    const userObject = newUser.toObject();
+    
     // Return response in your required format
     const userResponse = {
-      _id: newUser._id,
-      userId: newUser.userId,
-      name: newUser.name,
-      email: newUser.email,
-      role: newUser.role,
-      createdAt: newUser.createdAt,
-      __v: newUser.__v,
+      _id: userObject._id.toString(),
+      userId: userObject.userId,
+      name: userObject.name,
+      email: userObject.email,
+      role: userObject.role,
+      createdAt: userObject.createdAt.toISOString(),
+      __v: userObject.__v,
     };
 
     return NextResponse.json(

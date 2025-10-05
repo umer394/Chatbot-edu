@@ -18,6 +18,17 @@ const UserSchema = new Schema<IUser>({
   createdAt: { type: Date, default: Date.now },
 });
 
+// Add pre-save middleware to ensure fields are set
+UserSchema.pre('save', function(next) {
+  if (!this.userId) {
+    this.userId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  }
+  if (!this.createdAt) {
+    this.createdAt = new Date();
+  }
+  next();
+});
+
 // Prevent recompiling model on hot reload in Next.js
 const User = models.User || mongoose.model<IUser>("User", UserSchema);
 export default User;
