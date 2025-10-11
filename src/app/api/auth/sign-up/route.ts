@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { connectDB } from "@/lib/mongodb";
 import User from "@/models/User";
 
+// Unique User ID Generator (6 char hex)
 function generateUserId(): string {
-  return Math.random().toString(36).substring(2, 6).toUpperCase();
+  return crypto.randomBytes(3).toString("hex").toUpperCase(); 
 }
 
 export async function POST(req: Request) {
   try {
-    const { name, email, password, confirmPassword ,createdAt} = await req.json();
+    const { name, email, password, confirmPassword } = await req.json();
+
     if (!name || !email || !password || !confirmPassword) {
       return NextResponse.json(
         { error: "All fields are required" },
@@ -35,48 +38,44 @@ export async function POST(req: Request) {
       );
     }
 
-    // Generate 4-char alphanumeric ID
-    const userId = generateUserId();
+    // Generate unique userId
+    let userId = generateUserId();
+    // agar duplicate mil jaye to phir se generate karo
+    while (await User.findOne({ userId })) {
+      userId = generateUserId();
+    }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user with explicit fields
-    const userData = {
+    // Create new user
+    const newUser = await User.create({
       userId,
       name,
       email,
       password: hashedPassword,
       role: "user",
-      createdAt: new Date(),
-    };
+    });
 
-    const newUser = new User(userData);
-    await newUser.save();
-    
-    // Convert to plain object to ensure all fields are accessible
-    const userObject = newUser.toObject();
-    
-    // Return response in your required format
+    // Response
     const userResponse = {
-      _id: userObject._id.toString(),
-      userId: userObject.userId,
-      name: userObject.name,
-      email: userObject.email,
-      role: userObject.role,
-      createdAt: userObject.createdAt.toISOString(),
-      __v: userObject.__v,
+      _id: newUser._id,
+      userId: newUser.userId,
+      name: newUser.name,
+      email: newUser.email,
+      role: newUser.role,
+      createdAt: newUser.createdAt,
     };
 
     return NextResponse.json(
       { message: "User registered successfully", user: userResponse },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error) {
     console.error("Signup Error:", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
-      { status: 500 }
-    );
-  }
+      { status: 500 }
+    );
+  }
 }
