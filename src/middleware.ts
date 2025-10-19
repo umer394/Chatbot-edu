@@ -16,19 +16,19 @@ export async function middleware(req: NextRequest) {
   
   // If user is authenticated and tries to access auth pages → redirect to dashboard
   if (token && (pathname === "/login" || pathname === "/sign-up")) {
-    console.log(`[Middleware] Authenticated user accessing auth page, redirecting to dashboard`);
+    // console.log(`[Middleware] Authenticated user accessing auth page, redirecting to dashboard`);
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
   // Allow access to unprotected routes without authentication
   if (isUnprotectedRoute) {
-    console.log(`[Middleware] Allowing access to unprotected route: ${pathname}`);
+    // console.log(`[Middleware] Allowing access to unprotected route: ${pathname}`);
     return NextResponse.next();
   }
 
   // Protect all other routes - require authentication
   if (!token) {
-    console.log(`[Middleware] No token found, redirecting to login`);
+    // console.log(`[Middleware] No token found, redirecting to login`);
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
@@ -36,11 +36,11 @@ export async function middleware(req: NextRequest) {
   try {
     const secret = new TextEncoder().encode(process.env.JWT_SECRET as string);
     await jwtVerify(token, secret);
-    console.log(`[Middleware] Token verification successful for ${pathname}`);
+    // console.log(`[Middleware] Token verification successful for ${pathname}`);
     return NextResponse.next();
   } catch (err) {
-    console.error(`[Middleware] JWT verification failed:`, err);
-    console.log(`[Middleware] Invalid token, redirecting to login`);
+    // console.error(`[Middleware] JWT verification failed:`, err);
+    // console.log(`[Middleware] Invalid token, redirecting to login`);
     
     // Clear the invalid token cookie
     const response = NextResponse.redirect(new URL("/login", req.url));

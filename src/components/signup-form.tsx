@@ -56,9 +56,10 @@ export function SignupForm() {
     setIsLoading(true);
 
     try {
-      const res = await fetch("/api/auth/sign-up", {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/signup`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({
           name: form.name,
           email: form.email,

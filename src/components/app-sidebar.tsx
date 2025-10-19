@@ -34,6 +34,11 @@ const items = [
     url: "/contact",
     icon: Mail,
   },
+  {
+    title: "Email",
+    url: "/dashboard/email",
+    icon: Mail,
+  },
 ]
 
 const handleLogout = async () => {
