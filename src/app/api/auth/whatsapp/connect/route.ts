@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const backend = process.env.NEXT_PUBLIC_BACKEND_URL!;
+import { createProxyHeaders } from "@/lib/proxy-headers";
 
-function forwardCookies(req: NextRequest) {
-  const cookie = req.headers.get("cookie");
-  return cookie ? { cookie } : {};
-}
+const backend = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
 export async function POST(req: NextRequest) {
   const resp = await fetch(`${backend}/auth/whatsapp/connect`, {
     method: "POST",
-    headers: forwardCookies(req),
+    headers: createProxyHeaders(req),
     cache: "no-store",
   });
   const data = await resp.json();

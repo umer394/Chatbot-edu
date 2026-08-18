@@ -1,24 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const backend = process.env.NEXT_PUBLIC_BACKEND_URL!;
+import { createProxyHeaders } from "@/lib/proxy-headers";
 
-function forwardCookies(req: NextRequest) {
-  const cookie = req.headers.get("cookie");
-  return cookie ? { cookie } : {};
-}
+const backend = process.env.NEXT_PUBLIC_BACKEND_URL!;
 
 async function proxy(req: NextRequest, path: string) {
   const url = `${backend}/campaigns${path}${req.nextUrl.search}`;
+  const headers = createProxyHeaders(req);
   const init: RequestInit = {
     method: req.method,
-    headers: forwardCookies(req),
+    headers,
     cache: "no-store",
   };
 
   if (req.method !== "GET" && req.method !== "HEAD") {
     const body = await req.text();
     if (body) {
-      init.headers = { ...init.headers, "Content-Type": "application/json" };
+      headers.set("Content-Type", "application/json");
       init.body = body;
     }
   }
