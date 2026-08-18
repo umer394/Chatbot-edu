@@ -1,9 +1,5 @@
-import Email from "@/components/Email";
+import { redirect } from "next/navigation";
 
-export default function EmailPage(){
-    return(
-        <div>
-            <Email />
-        </div>
-    )
+export default function LegacyEmailPage() {
+  redirect("/dashboard/campaigns/email");
 }

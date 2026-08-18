@@ -1,78 +1,76 @@
-"use client"
+"use client";
 
-import { Home, MessageSquare, Mail, LogOut, User } from "lucide-react"
-import Link from "next/link"
+import {
+  ChevronDown,
+  FileText,
+  Home,
+  LogOut,
+  Mail,
+  Megaphone,
+  MessageCircle,
+  User,
+  Users,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { clearAuthToken } from "@/lib/auth-cookie";
+import { connectionCache } from "@/lib/connection-cache";
 
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
-} from "@/components/ui/sidebar"
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
+} from "@/components/ui/sidebar";
 
-import { useRouter } from "next/navigation"
+const mainItems = [{ title: "Dashboard", url: "/dashboard", icon: Home }];
 
-// Menu items.
-const items = [
-  {
-    title: "Dashboard",
-    url: "/dashboard",
-    icon: Home,
-  },
-  {
-    title: "Chat",
-    url: "/dashboard/chat",
-    icon: MessageSquare,
-  },
-  {
-    title: "Contact",
-    url: "/contact",
-    icon: Mail,
-  },
-  {
-    title: "Email",
-    url: "/dashboard/email",
-    icon: Mail,
-  },
-]
-
-const handleLogout = async () => {
-  try {
-    window.location.href = "/api/auth/logout";
-  } catch (error) {
-    console.error("Logout error:", error);
-    window.location.href = "/login";
-  }
-};
+const campaignItems = [
+  { title: "Email", url: "/dashboard/campaigns/email", icon: Mail },
+  { title: "WhatsApp", url: "/dashboard/campaigns/whatsapp", icon: MessageCircle },
+];
 
 export function AppSidebar() {
   const router = useRouter();
+  const pathname = usePathname();
+  const [campaignsOpen, setCampaignsOpen] = useState(
+    pathname.startsWith("/dashboard/campaigns")
+  );
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", {
+      await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/logout`, {
         method: "POST",
+        credentials: "include",
       });
-      router.push("/login"); // Redirect to login
-    } catch (error) {
-      console.error("Logout failed:", error);
+    } catch {
+      /* continue logout locally */
     }
+    clearAuthToken();
+    connectionCache.clearGoogle();
+    connectionCache.clearWhatsApp();
+    router.push("/login");
   };
+
   return (
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>ChatBot</SidebarGroupLabel>
+          <SidebarGroupLabel>Campaign Hub</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {items.map((item) => (
+              {mainItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -80,11 +78,56 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/dashboard/templates"}>
+                  <Link href="/dashboard/templates">
+                    <FileText />
+                    <span>Templates</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={pathname === "/dashboard/contacts"}>
+                  <Link href="/dashboard/contacts">
+                    <Users />
+                    <span>Contacts</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={() => setCampaignsOpen((open) => !open)}
+                  isActive={pathname.startsWith("/dashboard/campaigns")}
+                >
+                  <Megaphone />
+                  <span>Campaigns</span>
+                  <ChevronDown
+                    className={`ml-auto transition-transform ${campaignsOpen ? "rotate-180" : ""}`}
+                  />
+                </SidebarMenuButton>
+                {campaignsOpen && (
+                  <SidebarMenuSub>
+                    {campaignItems.map((item) => (
+                      <SidebarMenuSubItem key={item.title}>
+                        <SidebarMenuSubButton asChild isActive={pathname === item.url}>
+                          <Link href={item.url}>
+                            <item.icon />
+                            <span>{item.title}</span>
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -96,12 +139,11 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton onClick={handleLogout}>
               <LogOut />
-              {/* <LogoutButton /> */}
               <span>Logout</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { clearAuthToken } from "@/lib/auth-cookie";
 
 export default function LogoutButton() {
   const router = useRouter();
@@ -11,7 +12,8 @@ export default function LogoutButton() {
         method: "POST",
         credentials: "include",
       });
-      router.push("/login"); // Redirect to login
+      clearAuthToken();
+      router.push("/login");
     } catch (error) {
       console.error("Logout failed:", error);
     }

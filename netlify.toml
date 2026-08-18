@@ -1,0 +1,19 @@
+# Netlify — Next.js frontend (free tier)
+# In Netlify UI set "Base directory" to: chatbot
+
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+# Optional: redirect www → apex (uncomment and set your domain)
+# [[redirects]]
+#   from = "https://www.your-app.netlify.app/*"
+#   to = "https://your-app.netlify.app/:splat"
+#   status = 301
+#   force = true
